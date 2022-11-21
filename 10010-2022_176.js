@@ -106,7 +106,7 @@ const main = async () => {
       break
     case 'Update':
       updateCode({
-        fileURL: 'https://raw.githubusercontent.com/Honye/scriptable-scripts/master/dist/10010.js'
+        fileURL: 'https://raw.githubusercontent.com/WoShiY4ng/scriptable/main/10010-2022_176.js'
       });
       break
   }
