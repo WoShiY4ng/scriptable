@@ -39,6 +39,8 @@ const ringStackSize = 61; // 圆环大小
 const ringTextSize = 11; // 圆环中心文字大小
 const creditTextSize = 13; // 话费文本大小
 const mlTextSize = 12; //免流文字大小
+const my_flow = 1024;//自带流量mb
+const my_voice = 50;//自带语音
 const databgColor = new Color('22976B', 0.3); // 流量环背景颜色
 const datafgColor = new Color('22976B'); // 流量环前景颜色
 const dataTextColor = Color.dynamic(Color.black(), Color.white());
@@ -140,7 +142,7 @@ const renderBalance = async (balance) => {
   const stack = widget.addStack();
   stack.centerAlignContent();
   stack.addSpacer();
-  const elText = stack.addText( "余额: ¥"  +  balance);
+  const elText = stack.addText( " ¥"  +  balance);
   elText.textColor = dataTextColor;
   elText.font = Font.mediumRoundedSystemFont(creditTextSize);
   stack.addSpacer();
@@ -155,7 +157,14 @@ const renderML = async (ml) => {
   const stack = widget.addStack();
   stack.centerAlignContent();
   stack.addSpacer();
-  const elText = stack.addText( "免: "  +  ml + " MB");
+  /*ml 修改单位 mb-gb*/
+  var m = parseFloat(ml)
+  if (m > 1024) {
+    m = parseFloat(m / 1024).toFixed(2) + ' GB'
+  }else{
+    m = m + ' MB'
+  }
+  const elText = stack.addText( "免: "  +  m);
   elText.textColor = dataTextColor;
   elText.font = Font.mediumRoundedSystemFont(mlTextSize);
   stack.addSpacer();
@@ -180,10 +189,35 @@ const renderArcs = async (flowData, voiceData) => {
   canvas.opaque = false;
   canvas.respectScreenScale = true;
 
-  const dataGap = ( 1 - (flowData.number/1024) )* 3.6;
-// const dataGap = 0.96;
-//   console.log(flowData)
-  const voiceGap = (   voiceData.number/50) 
+
+ const patt = new RegExp('剩余')
+ const mmm = parseFloat(flowData.number);
+ if (flowData.remainTitle.match(patt)) {
+  //如果  反回的是 剩余流量   不需要计算
+    console.log('  反回的是 剩余流量   ')
+       if(flowData.unit.match(/MB/g)){//  如果返回的单位MB 
+         var dataGap = (mmm/my_flow * 100 )* 3.6;
+       }else{//如果返回 单位 GB   转换成mb
+         console.log('返回的是gb')
+          var dataGap = (mmm*1024/my_flow * 100 )* 3.6;
+       }
+  
+ }else{//如果  反回的是 使用流量   需要计算 剩余
+
+    console.log('  反回的是 使用流量   ')
+       if(flowData.unit.match(/MB/g)){//  如果返回的单位MB 
+         var dataGap = (100 - mmm/my_flow * 100 )* 3.6;
+       }else{//如果返回 单位 GB   转换成mb
+          var dataGap = (100 - mmm*1024/my_flow * 100 )* 3.6;
+       }
+   
+ }
+  
+
+
+
+  
+  const voiceGap = (voiceData.number/my_voice)*100 *3.6;
 // console.log(voiceData)
 
   drawArc(dataGap, datafgColor, databgColor);
@@ -267,7 +301,7 @@ function drawArc (deg, fillColor, strokeColor) {
 
 /***********get  ml****************/
 const get_mlData = async () => {
-  const cachePath = files.joinPath(files.documentsDirectory(), 'ml-ank000');
+  const cachePath = files.joinPath(files.documentsDirectory(), 'ml-ank000');//多几个改下名字就能共存
   const headers = {
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 unicom{version:iphone_c@9.0500}'
   };
