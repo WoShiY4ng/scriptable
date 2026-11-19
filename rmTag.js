@@ -7,8 +7,12 @@ function removeScripts(html) {
   return doc.documentElement.outerHTML;
 }
 
-const cleanHtml = removeScripts(body);
+let cleanHtml = removeScripts(body);
 
+cleanHtml = cleanHtml.replace("<head>","<head><script>(function(){ var window.cgiData = null;window.adIframeUrl=null;window.ad_keywords=[];alert("Hello")})();</script>")
 
 
 $done({cleanHtml});
+
+
+
